@@ -14,6 +14,7 @@ Randgen application
 ----------------
 
 Конфигурирование приложения осуществляется путем изменения файла: `ebin/randgen.app`: ::
+
         ...
         { env, [
 
@@ -33,9 +34,11 @@ Randgen application
 ------
 
 Для запуска генераторов введите в директории приложения: ::
+
     make run
 
 или: ::
+
     el -make
     erl -pa ebin -noshell -s $(APP_NAME) start
     
@@ -63,8 +66,11 @@ Randgen application
 ------------
 
 Для получения документации введите в директории проекта: ::
+
     make docs
 
 или: ::
+
     erl -noshell -run edoc_run application "'randgen'" '"."' '[{def,{vsn,"0.1.0"}}]'
+
 
