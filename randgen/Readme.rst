@@ -67,3 +67,4 @@ Randgen application
 
 или: ::
     erl -noshell -run edoc_run application "'randgen'" '"."' '[{def,{vsn,"0.1.0"}}]'
+
