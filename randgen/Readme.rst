@@ -45,7 +45,7 @@ Randgen application
 
 `randgen.erl` стартует приложение
 
-`randgen_app.erl` реализует OTP поведение `bahavior`
+`randgen_app.erl` реализует OTP поведение `application`
     и запускает при старте определенное в конфигурации `num_gen` количество генераторов
 
 `randgen_sup.erl` реализует OTP поведение `supervisor`,
