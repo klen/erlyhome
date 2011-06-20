@@ -33,9 +33,11 @@ Api application
 ------
 
 Для запуска сервера введите в директории приложения: ::
-    make server
+
+    make serve
 
 или: ::
+
     el -make
     yaws -i -c priv/yaws.conf
     
@@ -61,11 +63,12 @@ Api application
 ------------
 
 Для получения документации введите в директории проекта: ::
+
     make docs
 
 или: ::
+
     erl -noshell -run edoc_run application "'randgen'" '"."' '[{def,{vsn,"0.1.0"}}]'
 
 
 .. _YAWS: http://yaws.hiber.org
-
