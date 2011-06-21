@@ -28,8 +28,7 @@
 %% @spec init(Args) -> { ok, State, Timeout } 
 %% @doc  init random generator process
 init([ Uri, MaxValue, Timeout ]) ->
-    {A1, A2, A3} = now(),
-    random:seed(A1, A2, A3),
+    random:seed(now()),
     { ok, #seed{uri=Uri, max_value=MaxValue, timeout=Timeout}, Timeout }
 .
 
@@ -56,11 +55,19 @@ handle_call(_Call, _From, State) ->
 .
 
 
+%  > where is it used?
+%  It's simple interface for using in future
+%  ---------
 %% @spec handle_cast(delete, State) -> { stop, normal, State } 
 %% @doc  Stop random generator process.
 handle_cast( delete, State ) ->
     error_logger:info_msg("~p stopped.", [ self() ]),
     { stop, normal, State }
+;
+%% @spec handle_cast(Cast, State) -> { noreply, State } 
+%% @doc  Dummy handle_cast
+handle_cast( _Cast, State ) ->
+    { noreply, State }
 .
 
 
