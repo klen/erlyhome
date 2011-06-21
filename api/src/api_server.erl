@@ -11,8 +11,9 @@
 -author('Kirill Klenov <horneds@gmail.com>').
 -behavior(gen_server).
 -export([
+    update_store/1,
     start_link/1,
-    update_state/2,
+    put_number/2,
     get/0,
     put/1
 ]).
@@ -25,23 +26,27 @@
     code_change/3
 ]).
 
--define(SERVER, ?MODULE).
--include("api.hrl").
+-record( state, { cur_seq=[], stored_seq=[], limit=10 } ).
+
 -include_lib("eunit/include/eunit.hrl").
 
 
 %% @spec start_link( Limit ) -> {ok, Pid}
 %% @doc Starts the server.
-start_link( Limit ) ->
+start_link(Limit) when is_integer(Limit) ->
     error_logger:info_msg("Starting api with limit: ~p", [ Limit ]),
-    gen_server:start_link({local, ?SERVER}, ?MODULE, Limit, [])
+    gen_server:start_link({local, ?MODULE}, ?MODULE, Limit, [])
+;
+start_link(SLimit) when is_list(SLimit) ->
+    Limit = list_to_integer(SLimit),
+    start_link(Limit)
 .
 
 
 %% @spec get() -> Result
 %% @doc Interface for get saved sequences.
 get() ->
-    {ok, Result} = gen_server:call( ?SERVER, get ),
+    {ok, Result} = gen_server:call( ?MODULE, get ),
     Result
 .
 
@@ -49,7 +54,8 @@ get() ->
 %% @spec put(Number::list()) -> Response
 %% @doc  Put number in sequences.
 put(Number) when is_list(Number) ->
-    gen_server:cast(?SERVER, {put, Number})
+    % why don't we use numbers???
+    gen_server:cast(?MODULE, {put, Number})
 ;
 %% @spec put(Number::integer()) -> Response
 %% @doc  Convert number in integer and put.
@@ -69,7 +75,7 @@ init( Limit ) ->
 %% @spec handle_call( get, _From, State) -> { ok, State::record() }
 %% @doc Get saved sequences
 handle_call(get, _From, State) ->
-    Store = get_store(State),
+    Store = update_store(State),
     { reply, { ok, Store }, State }
 .
 
@@ -77,7 +83,7 @@ handle_call(get, _From, State) ->
 %% @spec handle_cast( { put, Number }, State::record()) -> { noreply, State::record() }
 %% @doc Increase sequence and save results in server state.
 handle_cast( { put, Number }, State ) ->
-    { ok, NewState } = update_state(Number, State),
+    { ok, NewState } = put_number(Number, State),
     {noreply, NewState}
 ;
 
@@ -118,32 +124,32 @@ code_change( _OldVsn, State, _Extra ) ->
 %%--------------------------------------------------------------------
 
 
-update_state(Number, State = #state{seq = []}) ->
-    { ok, State#state{ seq = [ Number ] } }
+put_number(Number, State = #state{cur_seq = []}) ->
+    { ok, State#state{ cur_seq = [ Number ] } }
 ;
-%% @spec update_state(Number, State) -> { ok, State } 
+%% @spec put_number(Number, State) -> { ok, State } 
 %% @doc  Get number and return new or old state.
-update_state(Number, State) ->
-    [ Max | _Rest ] = State#state.seq,
+put_number(Number, State) ->
+    [ Max | _Rest ] = State#state.cur_seq,
     [ IMax, INumber ] = [ list_to_integer(Max), list_to_integer(Number) ],
     if
         INumber > IMax ->
 
             % Continue sequence
-            { ok, State#state{ seq = [ Number | State#state.seq ] } };
+            { ok, State#state{ cur_seq = [ Number | State#state.cur_seq ] } };
 
         true ->
 
             % Create new sequence and update store
-            { ok, State#state{ seq = [ Number ], store = get_store(State) } }
+            { ok, State#state{ cur_seq = [ Number ], stored_seq = update_store(State) } }
 
     end
 .
 
-%% @spec get_store(State) -> Store 
+%% @spec update_store(State) -> Store 
 %% @doc  Update store from current sequence and return sorted.
-get_store(#state{ store=Store, limit=Limit, seq=Seq }) ->
-    SortStore = lists:sort(fun (X, Y)  -> length(X) > length(Y) end, [ Seq | Store ]),
+update_store(#state{ stored_seq=Store, limit=Limit, cur_seq=Seq }) ->
+    SortStore = lists:sort(fun (X, Y) -> length(X) > length(Y) end, [ Seq | Store ]),
     lists:sublist(SortStore, Limit)
 .
 
@@ -151,17 +157,17 @@ get_store(#state{ store=Store, limit=Limit, seq=Seq }) ->
 %%--------------------------------------------------------------------
 %% Some simple tests.
 %%--------------------------------------------------------------------
-get_store_test() ->
+update_store_test() ->
     [
-        ?assert( get_store(#state{ store=[["1", "2"]], seq=["1", "2", "3"]}) =:= [["1", "2", "3"], ["1", "2"]])
+        ?assert( update_store(#state{ stored_seq=[["1", "2"]], cur_seq=["1", "2", "3"]}) =:= [["1", "2", "3"], ["1", "2"]])
     ]
 .
 
-update_state_test() ->
+put_number_test() ->
     [
-        ?assert(update_state("3", #state{ store=[["2", "1"]], seq=["3", "2", "1"]}) =:= { ok, #state{
-            store=[["3", "2", "1"], ["2", "1"]],
-            seq = ["3"]
+        ?assert(put_number("3", #state{ stored_seq=[["2", "1"]], cur_seq=["3", "2", "1"]}) =:= { ok, #state{
+            stored_seq=[["3", "2", "1"], ["2", "1"]],
+            cur_seq = ["3"]
         } })
     ]
 .
