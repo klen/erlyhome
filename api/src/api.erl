@@ -6,7 +6,13 @@
 %% 
 %%  @doc Interface module for API application.
 %%  @end                      
+
+%% > What this module for? start/stop is usually done from boot scripts,
+%% > fetch is just api_server:get(),
+%% > so there's no need for this module at all
+%% Ok, but now we not have any boot script here.
 %% -------------------------------------------------------------------
+
 -module(api).
 -author('Kirill Klenov <horneds@gmail.com>').
 -export([
