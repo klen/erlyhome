@@ -34,18 +34,19 @@ init([]) ->
 
     % Parse application options
 
-
     % >> are you sure that here we will always have {ok, _} as a result
-    % Im not sure, but error here is the result of incorrectly configured application
+    % Im not sure, but error here is the result of incorrectly configured application.
+    % In this situation, exception is better (IMHO). 
     % ----------
+    
     { ok, Opts } = get_config(),
-    { ok, Limit } = proplists:get_value(num_seq, Opts, {ok, ?DEFAULT_LIMIT}),
-
+    Limit = proplists:get_value(num_seq, Opts, ?DEFAULT_LIMIT),
 
     % >> just style change
     % >> if there's more than one child, the following style is better (IMHO)
     % Ok, not problem for me, because i have no coding style in erlang
     % ----------
+    
     { ok, { { one_for_one, 4, 3600 }, [
                 { api_server, { api_server, start_link, [ Limit ] }, 
                     permanent, 2000, worker, [ api_server ] }
@@ -53,7 +54,6 @@ init([]) ->
                 %, {...}
             ] } }
 .
-
 
 
 %% @spec get_config() -> { ok, Terms } 
@@ -68,6 +68,7 @@ get_config() ->
             % >> I'd better use here ?MODULE instead of 'api'
             % ?MODULE here have value 'api_sup' will it work?
             % ----------
+            
             { ok, Terms }
     end
 .
