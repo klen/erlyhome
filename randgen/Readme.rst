@@ -39,7 +39,7 @@ Randgen application
 
 или: ::
 
-    el -make
+    erl -make
     erl -pa ebin -noshell -s $(APP_NAME) start
     
 
@@ -72,5 +72,3 @@ Randgen application
 или: ::
 
     erl -noshell -run edoc_run application "'randgen'" '"."' '[{def,{vsn,"0.1.0"}}]'
-
-

@@ -38,7 +38,7 @@ Api application
 
 или: ::
 
-    el -make
+    erl -make
     yaws -i -c priv/yaws.conf
     
 
@@ -68,7 +68,7 @@ Api application
 
 или: ::
 
-    erl -noshell -run edoc_run application "'randgen'" '"."' '[{def,{vsn,"0.1.0"}}]'
+    erl -noshell -run edoc_run application "'api'" '"."' '[{def,{vsn,"0.1.0"}}]'
 
 
 .. _YAWS: http://yaws.hiber.org
