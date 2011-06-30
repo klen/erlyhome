@@ -1,0 +1,5 @@
+*.beam
+logs
+erl_crash.dump
+*.diff
+
